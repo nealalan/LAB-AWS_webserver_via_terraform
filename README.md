@@ -1,10 +1,29 @@
-# [nealalan.github.io](https://nealalan.github.io)/[tf-201812-nealalan.com](https://nealalan.github.io/tf-201812-nealalan.com)
+# [nealalan.github.io](https://nealalan.github.io)/[LAB-AWS_webserver_via_terraform](https://nealalan.github.io/LAB-AWS_webserver_via_terraform)
 
-## Project Goal
-- Fully automate the creation of an NGINX webserver running on AWS EC2.
+# Project Goal
 - Stay security minded by restricting network access and creating a secure web server. 
-- Verify secure sites: [Sophos Security Headers Scanner](https://securityheaders.com/) and [SSL Labs test
-](https://www.ssllabs.com/ssltest).
+- Create a secure web server within the free tier of AWS.
+- Fully automate the creation of a Virtual Private Cloud and all necessary components.
+- Automate, as much as possible, the installation and configuration of an NGINX webserver.
+- Pull the website source data from github.
+
+# Section 1 - AWS Setup.
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/AWSfreetier.png?raw=true)
+- If you have a .edu email address you can sign up for an educational account, which will not require a credit card.
+- You will have to enter a credit card, but will still be given "free tier" credit. 
+- Create an AWS root account.
+
+## Billing
+- It's important to watch your use! Be prepared to be charged a few dollars if you don't pay attention to the terms. But you can avoid charges by reading pricing documentation before you do things.
+  - If you run more than 750 hours of EC2 instances in a month (there are 744 in a month) you can be charged. 
+  - If you use more than 30 GB of space, irrelevant of the instance running, you will be charged. 
+  - If you have an Elastic IP that isn't assigned to an active instance or gateway, you will be charged per hour.
+- Pay attention to [BILLING](https://console.aws.amazon.com/billing/home?region=no-region#/bills) and [cost explorer](https://console.aws.amazon.com/billing/home?region=no-region#/). 
+- If you do see a few charges, don't panic. Once you remove it, the charges should stop and may go away. 
+
+# Section 2 - AWS Security
+- First, you need a password manager! If you're not using a password manager, you might not be ready for cloud technology. You will have a number of keys and passwords to keep track of. Here's a good article... [Consumer Reports: Everything You Need to Know About Password Managers](https://www.consumerreports.org/digital-security/everything-you-need-to-know-about-password-managers/)
+
 
 ## Prereqs
 - See [https://nealalan.github.io/EC2_Ubuntu_LEMP/](https://nealalan.github.io/EC2_Ubuntu_LEMP/) project and go through the steps up until VPC, they include:
@@ -50,6 +69,11 @@ Optional:
 My server is at static IP [18.223.13.99](http://18.223.13.99) serving [https://nealalan.com](https://nealalan.com) and [https://neonaluminum.com](https://neonaluminum.com) with redirects from all http:// addresses
 
 ![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/sites-as-https.png)
+
+
+- Verify secure sites: [Sophos Security Headers Scanner](https://securityheaders.com/) and [SSL Labs test
+](https://www.ssllabs.com/ssltest).
+
 
 ## NEXT STEPS
 As you move around you'll need to log in to the AWS Console and add your local IP address to the EC2: Network ACLs. Here's an example of one I had in the past...
