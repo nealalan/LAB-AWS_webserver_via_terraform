@@ -8,6 +8,19 @@
 - Pull the website source data from github.
 - Note: Installing a quality file editor such as [Atom](https://atom.io/) is highly recommended!
 
+# Project Files
+- ~/ - your home folder. 
+- ~/Projects/ folder - where your projects should be located, including the scripts you pull down
+- [vpc.tf](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/vpc.tf) - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet
+  - best practice is to separate out the terraform components into sections, but this worked out well for me to have it in one file
+  - need to implement the logic to automatically push (scp?) the install.sh file to the EC2 instance and run it automatically
+- [install.sh](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/install.sh) - shell script to configure the Ubuntu instance to configure NGINX web server with secure websites (https)
+  - website are automatically pulled from git repos for respective sites
+- ~/.ssh/web-site.pem
+- ~/.ssh/web-site-pub-key.pem
+- ~/.ssh/known_hosts
+- ~/.aws/credentials - the file that will store your automated AWS keys and secret keys
+
 # Section 1 - AWS Setup.
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/AWSfreetier.png?raw=true)
 - If you have a .edu email address you can sign up for an educational account, which will not require a credit card.
@@ -70,7 +83,7 @@ $ cd .ssh
 # set the permissions on the key for it to be used by ssh utilities
 $ chmod 500 web-site.pem
 # generate a public key from the private key file
-$ ssh-keygen -y -f web-site.pem > web-site-pub-key
+$ ssh-keygen -y -f web-site.pem > web-site-pub-key.pem
 ```
 
 # Section 3 - Domain Name
@@ -83,6 +96,7 @@ You have a couple choices for domain names.
 - For AWS Route 53, Go to "Registered domains" and click "Register domain"
 
 ## Create a Hosted Zone in Route 53
+NOTE: The hosted zone in route 53 has a monthly charge of about 50 cents. If you choose, you can manage your DNS records outside of AWS. 
 - Go to "Hosted Zones" and click "Create Hosted Zone"
 - Enter your domain name and click Create!
 ![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/nsrecords.png)
@@ -127,114 +141,105 @@ aws_secret_access_key = z9************************************
 ```
 We will be referring to these in our variables in our terraform script.
 
-## Customize the script
-
-
-## Prereqs
-
-
- 
-
-- An AWS account with the IAM keys created for use in terraform
-- Install [terraform](https://learn.hashicorp.com/terraform/getting-started/install.html) or search your package manager
-  - Configure terraform with IAM keys
-
-
-
-# Terraform Script
-## Files
-This repo contains two files:
-- [vpc.tf](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/vpc.tf) - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet
-  - best practice is to separate out the terraform components into sections, but this worked out well for me to have it in one file
-  - need to implement the logic to automatically push (scp?) the install.sh file to the EC2 instance and run it automatically
-- [install.sh](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/install.sh) - shell script to configure the Ubuntu instance to configure NGINX web server with secure websites (https)
-  - website are automatically pulled from git repos for respective sites
-
-
-
 ## Create an Elastic IP address
+IMPORTANT: An elastic IP may occur a charge if you take longer than an hour to submit the terraform script. Be prepared to manually delete the Elastic IP if you destroy your project or instance!!! You are manually creating this Elastic IP. Terraform WILL NOT delete this for you!
+- It is possible for Terraform to manually create an Elastic IP address. I choose to manually create my own because some users may choose to manage their DNS records outside of AWS.
 - Go to VPC, Click Elastic IP, Click Allocate New Address and select Amazon Pool.
 - Make a note of the IP address. You will need it later.
-- Take note, this will start to occur a charge if you take longer than an hour, to submit the terraform script.
 
-
+## Customize the script
+```bash
+$ atom vpc.tf
+```
+1) Remove documentation that is irrelevant to the your site.
+2) Change variables project_name. This is what your VPC will be named.
+3) Set your pub_key_path. This is the file you created from the private key in the .ssh/ folder.
+4) Set your creds_path and creds_profile. The creds fields are the AWS keys we saved.
+5) Add the instance_assigned_elastic_ip as the Elastic IP address you created.
+6) Find your local IP address as add_my_inbound_ip_cidr:
+```bash
+$ curl -4 ifconfig.co
+```
+7) (optional) Set your CIDR ranges. For this project we only need a couple of IP addresses, but you also want to learn CIDR addressing from a scalable perspective.
   - [VPC CIDR Address](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-cidr-address) and [Public Subnet](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-public-subnetwork-subnet)
+  - You can probably leave the CIDR ranges as listed.
+8) Change variables subnet_1_name and subnet_2_name.
+9) Name your pub_key_name what you want it to be called in the AWS Keys library.
+10) The ami variable should be fine unless you want to install a different version of Ubuntu.
 
-  - The first step in [Connect to your instance](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#connect-to-your-instance) - except here you can connect to ubuntu@domain.com or ubuntu@EIP
+Regarding the rest of the script, as of now, you shouldn't have to edit any of it, at least not for the scope of this lab.
 
-## Steps / Commands
-I used... 
-
-2. terraform init
-3. terraform plan
-4. terraform apply
-5. ssh -i priv_key.pem ubuntu@ip
-6. curl https://raw.githubusercontent.com/nealalan/tf-201812-nealalan.com/master/install.sh > install.sh
-7. chmod +x ./install.sh
-8. .install.sh
-
-Optional:
-- terraform plan -destroy
-- terraform destroy
-
-
-## Result
-My server is at static IP [18.223.13.99](http://18.223.13.99) serving [https://nealalan.com](https://nealalan.com) and [https://neonaluminum.com](https://neonaluminum.com) with redirects from all http:// addresses
-
-![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/sites-as-https.png)
-
-
-- Verify secure sites: [Sophos Security Headers Scanner](https://securityheaders.com/) and [SSL Labs test
-](https://www.ssllabs.com/ssltest).
-
-
-## NEXT STEPS
-As you move around you'll need to log in to the AWS Console and add your local IP address to the EC2: Network ACLs. Here's an example of one I had in the past...
-![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/ACLsshlist.png)
-Also, I now have the flexibility to totally recreate the websever through a few small script changes if I make major site changes, add a new domain name or need to upgrade to the latest LTS of Ubuntu.
-
-## Installing MariaDQ 
-And setting it to have a Root PW...
+## Run the script!
+1. TEST: This will show you any errors you have and give you details of everything that will be created by terraform.
 ```bash
-$ sudo apt install mariadb-client
-$ sudo apt install mariadb-server
-$ sudo passwd root (NealAlanDreher12)
-$ sudo mysql -u root
-# Disable plugin authentication for root
-> use mysql;
-> update user set plugin='' where User='root';
-> flush privileges;
-> exit
-$ sudo systemctl restart mariadb.service
-$ sudo mysql_secure_installation
-# verity root auth works
-$ sudo mysql -u root
-$ sudo mysql -u root -p
+terraform plan
 ```
-
-## Fixing Errors
-Within a few days I messed up my Ubuntu instance. The solution was clearly going to take longer than 15 minutes. So here's what I did, thanks to terraform:
-1. Grab what is managed by terraform
-![](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/images/Screen%20Shot%202018-12-10%20at%209.19.52%20PM.jpg?raw=true)
-2. Mark the Ubuntu instance as tainted for destruction
-```bash
-terraform taint aws_instance.wb
-```
-3. Verify what will happen (a side effect was my ACLs and SGs will be cleaned up since I was running an outdated lab that requried me to open some ports)
-```bash
-$ terraform plan
-```
-![](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/images/Screen%20Shot%202018-12-10%20at%209.17.39%20PM.jpg?raw=true)
-4. Run!
+2. RUN the script for real! After the script completed, you can explore your new Infrascture on AWS under VPC and EC2.
 ```bash
 $ terraform apply
 ```
-5. Setup Ubuntu to host my webserver again
+3. CONNECT: 
 ```bash
-$ curl https://raw.githubusercontent.com/nealalan/tf-201812-nealalan.com/master/install.sh > install.sh
-$ chmod +x ./install.sh
-$ .install.sh
+$ ssh -i ~/.ssh/web-site.pem ubuntu@ip
 ```
-6. Consider using virtuanenv or even running another EC2 instance when I want to plan with some labs?!?!?! I can alwauys assign a subdomain to a lab instance.
+Note: If your IP changes, for example you're on a VPN, you will need to add your new IP address to the VPC ACL. I do this nearly everytime I go to a new coffee shop.
+
+# Section 5 - NGINX and server configuration script
+
+## Download 
+You need to download the generic version of the scrip and then make the script executable.
+```bash
+$ curl https://raw.githubusercontent.com/nealalan/LAB-AWS_webserver_via_terraform/master/install.sh > install.sh
+$ chmod +x ./install.sh
+```
+## Customize the script
+```bas
+$ nano install.sh
+```
+1) Remove documentation that is irrelevant to the your site.
+2) Change all references of nealalan.com to your domain name.
+3) Remove all reference to neonaluminum.com (or change it to another domain or subdomain or for whatever you have the Elastic IP assigned to a DNS record.)
+4) On the "sudo certbot --authenticator" line, PLEASE change the email address to your email address.
+5) Remove the "git clone" lines for nealalan.com and neonaluminum.com unless you want to clone your websites. If you do remove them you will simply need to create your own.
+
+## Run the script!
+This will take a few minutes, and if you edited everything correctly, you should be kicked out of the ssh connection.
+```bash
+$ ./install.sh
+```
+After you reconnect using ssh, you should now be able to browse to your website in any browser.
+- If you didn't load a page, you will not see a page.
+
+# Section 6 - Your page
+In the script, links were automatically made to the folders holding your website. So, for example, from my ~/ (home directory) I can just perform:
+```bash
+$ cd nealalan.com
+$ nano index.html
+```
+And there I can directly edit my website.
+
+## My page
+- Here's my page: 
+  - My server is at static IP [18.223.13.99](http://18.223.13.99) 
+  - serving [https://nealalan.com](https://nealalan.com) [https://www.nealalan.com](https://www.nealalan.com)
+  - and [https://neonaluminum.com](https://neonaluminum.com) [https://www.neonaluminum.com](https://www.neonaluminum.com)
+  - with redirects from all http:// addresses
+
+![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/sites-as-https.png)
+
+- Verify secure sites using: [Sophos Security Headers Scanner](https://securityheaders.com/) and [SSL Labs test
+](https://www.ssllabs.com/ssltest).
+
+# Section 7 - Undo, undo, undo
+To get rid of everything: 
+- A few simple commands from your local machine
+```bash
+- terraform plan -destroy
+- terraform destroy
+```
+- Make sure all your [EC2 instances](https://us-east-2.console.aws.amazon.com/ec2/v2/home) are stopped or gone!
+- Remove your [Elastic IPs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#Addresses:sort=PublicIp). 
+- Ensure your [Route 53 hosted zones](https://console.aws.amazon.com/route53/home) are deleted.
+
 
 [[edit](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/edit/master/README.md)]
