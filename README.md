@@ -138,26 +138,28 @@ NOTE: The hosted zone in route 53 has a monthly charge of about 50 cents. If you
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.20.34%20PM.jpg?raw=true)
 
 # Section 4 - Terraform Script
-- You should have a Projects folder on your computer. If you're using a Mac, you could create it on your Desktop or in your Documents folder.
+- You should have a Projects folder on your computer, preferable in a "home" folder. 
+- If you're using a Mac, you could create it on your Desktop, in your Documents folder or in /home/neal/Projects/
 - From the command line, you need to pull down the terraform script
 ```bash
-$ cd
-$ cd Projects
-# if it doesn't exist use:
-$ mkdir Projects/
 $ cd Projects
 # pull down the scripts
 $ git clone https://github.com/nealalan/LAB-AWS_webserver_via_terraform.git
 ```
+- You will see the progess of the download...
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.46.35%20PM.jpg?raw=true)
 - You should have the files locally in Projects/LAB-AWS_webserver_via_terraform/
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.46.58%20PM.jpg?raw=true)
 
 ## Install Terraform
 Go to the [Hashicorp Terraform](https://learn.hashicorp.com/terraform/getting-started/install) site.
+```bash
+# if on a Mac, try
+$ brew install terraform
+```
 
 ## Setup Credentials
-Now you will use the keys created in AWS IAM.
+Use the keys created in AWS IAM.
 ```bash
 $ cd
 $ mkdir .aws
@@ -173,39 +175,43 @@ aws_secret_access_key = z9************************************
 We will be referring to these in our variables in our terraform script.
 
 ## Create an Elastic IP address
-IMPORTANT: An elastic IP may occur a charge if you take longer than an hour to submit the terraform script. Be prepared to manually delete the Elastic IP if you destroy your project or instance!!! You are manually creating this Elastic IP. Terraform WILL NOT delete this for you!
-- It is possible for Terraform to manually create an Elastic IP address. I choose to manually create my own because some users may choose to manage their DNS records outside of AWS.
 - Go to VPC, Click Elastic IP, Click Allocate New Address and select Amazon Pool.
-- Make a note of the IP address. You will need it later.
+  - Make a note of the IP address. You will need it later.
+
+- IMPORTANT: An elastic IP may incur an hourly charge ($0.003) if you take longer than an hour to submit the terraform script.   - Be prepared to manually delete the Elastic IP if you destroy your project or instance!!! 
+  - You are manually creating this Elastic IP. Terraform WILL NOT manage or delete this for you!
+  - It's a benefit to keep an Elastic IP so you don't have to go change your DNS records IP address anytime your instance is restarted.
+- SIDE NOTE: It is possible for Terraform to manually create an Elastic IP address. 
+  - I choose to manually create my own, becaus I'd have to manage my DNS records everytime terraform destroyed my Elastic IP.
 
 ## Customize the script
 ```bash
 $ atom vpc.tf
 ```
-1) Remove documentation that is irrelevant to the your site.
-2) Change variables project_name. This is what your VPC will be named.
-3) Set your pub_key_path. This is the file you created from the private key in the .ssh/ folder.
-4) Set your creds_path and creds_profile. The creds fields are the AWS keys we saved.
-5) Add the instance_assigned_elastic_ip as the Elastic IP address you created.
-6) Find your local IP address as add_my_inbound_ip_cidr:
+1. Remove documentation that is irrelevant to the your site.
+2. Change variables project_name. This is what your VPC will be named.
+3. Set your pub_key_path. This is the file you created from the private key in the .ssh/ folder.
+4. Set your creds_path and creds_profile. The creds fields are the AWS keys we saved.
+5. Add the instance_assigned_elastic_ip as the Elastic IP address you created.
+6. Find your local IP address as add_my_inbound_ip_cidr:
 ```bash
 $ curl -4 ifconfig.co
 ```
-7) (optional) Set your CIDR ranges. For this project we only need a couple of IP addresses, but you also want to learn CIDR addressing from a scalable perspective.
+7. (optional) Set your CIDR ranges. For this project we only need a couple of IP addresses, but you also want to learn CIDR addressing from a scalable perspective.
   - [VPC CIDR Address](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-cidr-address) and [Public Subnet](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-public-subnetwork-subnet)
   - You can probably leave the CIDR ranges as listed.
-8) Change variables subnet_1_name and subnet_2_name.
-9) Name your pub_key_name what you want it to be called in the AWS Keys library.
-10) The ami variable should be fine unless you want to install a different version of Ubuntu.
+8. Change variables subnet_1_name and subnet_2_name.
+9. Name your pub_key_name what you want it to be called in the AWS Keys library.
+10. The ami variable should be fine unless you want to install a different version of Ubuntu.
 
 Regarding the rest of the script, as of now, you shouldn't have to edit any of it, at least not for the scope of this lab.
 
 ## Run the script!
-1. TEST: This will show you any errors you have and give you details of everything that will be created by terraform.
+1. TEST: This will show you potential errors and give you details of resources that will be created by terraform.
 ```bash
 terraform plan
 ```
-2. RUN the script for real! After the script completed, you can explore your new Infrascture on AWS under VPC and EC2.
+2. RUN the script for real! After the script complets, you can explore your new Infrascture on AWS under VPC and EC2.
 ```bash
 $ terraform apply
 ```
@@ -213,6 +219,8 @@ $ terraform apply
 ```bash
 $ ssh -i ~/.ssh/web-site.pem ubuntu@ip
 ```
+  - Since you are using your elastic IP, you can connect to it or you can replace IP with any domain name the DNS records list the IP address for. Think of it as a shortcut.
+  
 Note: If your IP changes, for example you're on a VPN, you will need to add your new IP address to the VPC ACL. I do this nearly everytime I go to a new coffee shop.
 
 # Section 5 - NGINX and server configuration script
