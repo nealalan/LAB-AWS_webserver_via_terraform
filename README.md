@@ -49,21 +49,96 @@
   - Attach existing policies:
     - AmazonVPCFullAccess
     - AmazonEC2FullAccess 
-  - Grab your key and secret_key now. Save them in your Password Manager!
+  - Grab your "Access Key ID" and "Secret Access Key" now. Save them in your Password Manager!
   ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.45.39%20PM.jpg?raw=true)
+  - This will be the only opportunity for you to save the "Secret Access Key".
+  - Note: it is important that you don't share these keys for anything. Also, you want to make sure they are never exposed on a webpage or on github.
 
+## Public / Private Access Keys
+- You will need to create a key pair for use with the web server. 
+- The public key will be put onto the webserver and the private key will be used to connect from you computer to the web server.
+- The fallsafe way to generate a key for AWS Key Pairs and EC2 is to generate a key within EC2: Key Pairs.
+  - This process will download a file such as web-site.pem - your private key
+  - Save your keys to your home folder under a subfolder called .ssh/
+- Make sure you delete the key pair
+```bash
+$ cd
+$ cd .ssh
+# if the folder doesn't exist
+$ mkdir .ssh
+$ cd .ssh
+# set the permissions on the key for it to be used by ssh utilities
+$ chmod 500 web-site.pem
+# generate a public key from the private key file
+$ ssh-keygen -y -f web-site.pem > web-site-pub-key
+```
 
 # Section 3 - Domain Name
 
+## Pick Your Domain Name
+You have a couple choices for domain names.  
+- Domain names can be registered with GoDaddy or other registrar services. Or you can choose the cheapest one possible by searching "cheapest tld". 
+  - Can save you a few dollars. If you search "setup godaddy point to aws" you will find instructions.
+  - You have to setup the nameserver (NS) records on the registrar site to point to Amazon. 
+- For AWS Route 53, Go to "Registered domains" and click "Register domain"
+
+## Create a Hosted Zone in Route 53
+- Go to "Hosted Zones" and click "Create Hosted Zone"
+- Enter your domain name and click Create!
+![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/nsrecords.png)
+- Create your Start of Authority (SOA) and NameServer (NS) records. The NS records will be entered under the domain as the name servers to look for the DNS records.
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.21.18%20PM.jpg?raw=true)
+- Create your A type record for domain.com and www.domain.com
+- If you have a mail service setup that will host your mail, you can setup the MX records as shown.
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.20.34%20PM.jpg?raw=true)
+
+# Section 4 - Terraform Script
+- You should have a Projects folder on your computer. If you're using a Mac, you could create it on your Desktop or in your Documents folder.
+- From the command line, you need to pull down the terraform script
+```bash
+$ cd
+$ cd Projects
+# if it doesn't exist use:
+$ mkdir Projects/
+$ cd Projects
+# pull down the scripts
+$ git clone https://github.com/nealalan/LAB-AWS_webserver_via_terraform.git
+```
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.46.35%20PM.jpg?raw=true)
+- You should have the files locally in Projects/LAB-AWS_webserver_via_terraform/
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.46.58%20PM.jpg?raw=true)
+
+## Install Terraform
+Go to the [Hashicorp Terraform](https://learn.hashicorp.com/terraform/getting-started/install) site.
+
+## Setup Credentials
+Now you will use the keys created in AWS IAM.
+```bash
+$ cd
+$ mkdir .aws
+$ cd .aws
+$ atom credentials
+```
+In the credentials file you want an entry:
+```bash
+[terraform]
+aws_access_key_id = A*******************
+aws_secret_access_key = z9************************************
+```
+We will be referring to these in our variables in our terraform script.
+
+## Customize the script
+
+
 ## Prereqs
 
-  - Registering your domain name and creating a Hosted Zone in Route 53
-  - [VPC CIDR Address](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-cidr-address) and [Public Subnet](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-public-subnetwork-subnet)
-  - [EC2: Network & Security: Key Pairs](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#ec2-network--security-key-pairs)
-  - The first step in [Connect to your instance](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#connect-to-your-instance) - except here you can connect to ubuntu@domain.com or ubuntu@EIP
+
+ 
+
 - An AWS account with the IAM keys created for use in terraform
 - Install [terraform](https://learn.hashicorp.com/terraform/getting-started/install.html) or search your package manager
   - Configure terraform with IAM keys
+
 
 
 # Terraform Script
@@ -75,9 +150,21 @@ This repo contains two files:
 - [install.sh](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/install.sh) - shell script to configure the Ubuntu instance to configure NGINX web server with secure websites (https)
   - website are automatically pulled from git repos for respective sites
 
+
+
+## Create an Elastic IP address
+- Go to VPC, Click Elastic IP, Click Allocate New Address and select Amazon Pool.
+- Make a note of the IP address. You will need it later.
+- Take note, this will start to occur a charge if you take longer than an hour, to submit the terraform script.
+
+
+  - [VPC CIDR Address](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-cidr-address) and [Public Subnet](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-public-subnetwork-subnet)
+
+  - The first step in [Connect to your instance](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#connect-to-your-instance) - except here you can connect to ubuntu@domain.com or ubuntu@EIP
+
 ## Steps / Commands
 I used... 
-1. git clone this repo
+
 2. terraform init
 3. terraform plan
 4. terraform apply
