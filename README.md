@@ -1,4 +1,4 @@
-# [nealalan.github.io](https://nealalan.github.io)/[LAB-AWS_webserver_via_terraform](https://nealalan.github.io/LAB-AWS_webserver_via_terraform)
+## [nealalan.github.io](https://nealalan.github.io)/[LAB-AWS_webserver_via_terraform](https://nealalan.github.io/LAB-AWS_webserver_via_terraform)
 
 # Project Goal
 - Stay security minded by restricting network access and creating a secure web server. 
