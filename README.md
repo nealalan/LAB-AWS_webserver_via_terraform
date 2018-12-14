@@ -201,7 +201,7 @@ $ curl -4 ifconfig.co
   - [VPC CIDR Address](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-cidr-address) and [Public Subnet](https://github.com/nealalan/EC2_Ubuntu_LEMP/blob/master/README.md#vpc-public-subnetwork-subnet)
   - You can probably leave the CIDR ranges as listed.
 8. Change variables subnet_1_name and subnet_2_name.
-9. Name your pub_key_name what you want it to be called in the AWS Keys library.
+9. Name your pub_key_name what you want it to be called in the AWS Keys library. Likely best to keep it whatever the file of the key is called, without the .pem extension.
 10. The ami variable should be fine unless you want to install a different version of Ubuntu.
 
 Regarding the rest of the script, as of now, you shouldn't have to edit any of it, at least not for the scope of this lab.
@@ -226,7 +226,7 @@ Note: If your IP changes, for example you're on a VPN, you will need to add your
 # Section 5 - NGINX and server configuration script
 
 ## Download 
-You need to download the generic version of the scrip and then make the script executable.
+You need to download the generic version of the script and then make the script executable.
 ```bash
 $ curl https://raw.githubusercontent.com/nealalan/LAB-AWS_webserver_via_terraform/master/install.sh > install.sh
 $ chmod +x ./install.sh
@@ -235,11 +235,11 @@ $ chmod +x ./install.sh
 ```bas
 $ nano install.sh
 ```
-1) Remove documentation that is irrelevant to the your site.
-2) Change all references of nealalan.com to your domain name.
-3) Remove all reference to neonaluminum.com (or change it to another domain or subdomain or for whatever you have the Elastic IP assigned to a DNS record.)
-4) On the "sudo certbot --authenticator" line, PLEASE change the email address to your email address.
-5) Remove the "git clone" lines for nealalan.com and neonaluminum.com unless you want to clone your websites. If you do remove them you will simply need to create your own.
+1. Remove documentation that is irrelevant to the your site.
+2. Change all references of nealalan.com to your domain name.
+3. Remove all reference to neonaluminum.com (or change it to another domain or subdomain or for whatever you have the Elastic IP assigned to a DNS record.)
+4. On the "sudo certbot --authenticator" line, PLEASE change the email address to your email address.
+5. Remove the "git clone" lines for nealalan.com and neonaluminum.com unless you want to clone your websites. If you do remove them you will simply need to create your own.
 
 ## Run the script!
 This will take a few minutes, and if you edited everything correctly, you should be kicked out of the ssh connection.
@@ -279,6 +279,6 @@ To get rid of everything:
 - Make sure all your [EC2 instances](https://us-east-2.console.aws.amazon.com/ec2/v2/home) are stopped or gone!
 - Remove your [Elastic IPs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#Addresses:sort=PublicIp). 
 - Ensure your [Route 53 hosted zones](https://console.aws.amazon.com/route53/home) are deleted.
-
+- NOTE: Don't delete your account. You may want it again for another lab!
 
 [[edit](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/edit/master/README.md)]
