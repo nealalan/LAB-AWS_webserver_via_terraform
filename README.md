@@ -10,31 +10,40 @@
 
 # Project Files
 - ~/ - your home folder. 
-- ~/Projects/ folder - where your projects should be located, including the scripts you pull down
+- ~/Projects/ - where your projects should be located, including the scripts you pull down
 - [vpc.tf](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/vpc.tf) - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet
   - best practice is to separate out the terraform components into sections, but this worked out well for me to have it in one file
-  - need to implement the logic to automatically push (scp?) the install.sh file to the EC2 instance and run it automatically
+  - I can see a good practice in storing the variables in a separate .tf file - which is what terraform recommends
 - [install.sh](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/install.sh) - shell script to configure the Ubuntu instance to configure NGINX web server with secure websites (https)
   - website are automatically pulled from git repos for respective sites
-- ~/.ssh/web-site.pem
-- ~/.ssh/web-site-pub-key.pem
-- ~/.ssh/known_hosts
+- ~/.ssh/web-site.pem - Private key for you only. Good idea to store a copy in your pwd mgr.
+- ~/.ssh/web-site-pub-key.pem - Public key so you can connect to your server. 
+  - This is stored on AWS and in Ubuntu.
+- ~/.ssh/known_hosts - System file that stores a key fingerprint
+  - If you delete and recreate the same instance many times, you'll have to remove 'offending' records from here
 - ~/.aws/credentials - the file that will store your automated AWS keys and secret keys
 
 # Section 1 - AWS Setup.
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/AWSfreetier.png?raw=true)
-- If you have a .edu email address you can sign up for an educational account, which will not require a credit card.
+- If you have a .edu email address you can sign up for an educational account. No credit card required! Keep this forever!
 - You will have to enter a credit card, but will still be given "free tier" credit. 
-- Create an AWS root account.
+  - Don't worry, if you have a major mishap and some charges, AWS will be nice enough to credit you. 
+  - But you'll want a credit card on file if you decide to buy a domain name(s) and use Route 53.
+- Now, create your AWS root account!
 
 ## Billing
-- It's important to watch your use! Be prepared to be charged a few dollars if you don't pay attention to the terms. But you can avoid charges by reading pricing documentation before you do things.
-  - If you run more than 750 hours of EC2 instances in a month (there are 744 in a month) you can be charged. 
-  - If you use more than 30 GB of space, irrelevant of the instance running, you will be charged. 
-  - If you have an Elastic IP that isn't assigned to an active instance or gateway, you will be charged per hour.
-  - If you register a domain name and use the DNS service within AWS, you will be charged. You can use another provider for cheaper.
-- Pay attention to [BILLING](https://console.aws.amazon.com/billing/home?region=no-region#/bills) and [cost explorer](https://console.aws.amazon.com/billing/home?region=no-region#/). 
-- If you do see a few charges, don't panic. Once you remove it, the charges should stop and may go away. 
+- It's important to watch your use! 
+  - Be prepared to be charged a few dollars if you don't pay attention to the terms. 
+  - You can avoid charges by reading pricing documentation before you do things.
+  - You can be notified immediately of charges if you setup alerts!
+  - Examples: 
+    - If you run more than 750 hours of EC2 instances in a month (there are 744 in a month) you can be charged. 
+    - If you use more than 30 GB of space, irrelevant of the instance running, you will be charged. 
+    - If you have an Elastic IP that isn't assigned to an active instance or gateway, you will be charged per hour.
+    - If you register a domain name and use the DNS service within AWS, you will be charged. 
+  - Understand and watch [billing](https://console.aws.amazon.com/billing/home?region=no-region#/bills) and [cost explorer](https://console.aws.amazon.com/billing/home?region=no-region#/). 
+- If you do see a few charges, don't panic and try to destroy everything. Seek guidance.
+  - If you destroy things, you may miss what is actually causing the charges. And may cause MORE charges@
 
 # Section 2 - AWS Security
 - First, you need a password manager! 
@@ -42,7 +51,6 @@
   - You will have a number of keys and passwords to keep track of. 
   - Here's a good article... [Consumer Reports: Everything You Need to Know About Password Managers](https://www.consumerreports.org/digital-security/everything-you-need-to-know-about-password-managers/)
 
-## Identity and Access Management (IAM) & Account Security
 - When you have any account, you will be shown a number of pieces of data. 
 - Store these in your password manager! The data is for your root account. 
 - It is recommended you setup MFA (Multi-factor Authentication) for your root account.
@@ -51,29 +59,43 @@
 	- Account ID
 	- Access Key ID
 	- Secret Access Key
-- The [IAM Dashboard](https://console.aws.amazon.com/iam) will give you security status recomendations.
+	
+## Identity and Access Management (IAM) & Account Security
+- The [IAM Dashboard](https://console.aws.amazon.com/iam) will give you security status recomendations. Read them. Understand them. Put yourself in compliance. You don't want someone to get into your account and start running crypto mining and run in a $10,000 bill. It's happened.
+
 ![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/iam.png)
+
+### Create new users
 - Use IAM to create a new Administrator user. This will actually be what you use. 
   - It's a best practice not to log in with your root account.
   - I use my actual email address as my root and the first part (login) of my email as my main account. 
+
 - Use IAM to create a new terraform user. This is what the script will use.
   - Select programatic access. 
-  ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.29.42%20PM.jpg?raw=true)
-  - Attach existing policies:
+
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.29.42%20PM.jpg?raw=true)
+
+- Attach existing policies:
     - AmazonVPCFullAccess
     - AmazonEC2FullAccess 
   - Grab your "Access Key ID" and "Secret Access Key" now. Save them in your Password Manager!
-  ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.45.39%20PM.jpg?raw=true)
-  - This will be the only opportunity for you to save the "Secret Access Key".
+    - This will be the only opportunity for you to save the "Secret Access Key".
+
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.45.39%20PM.jpg?raw=true)
   - Note: it is important that you don't share these keys for anything. Also, you want to make sure they are never exposed on a webpage or on github.
 
 ## Public / Private Access Keys
 - You will need to create a key pair for use with the web server. 
-- The public key will be put onto the webserver and the private key will be used to connect from you computer to the web server.
-- The fallsafe way to generate a key for AWS Key Pairs and EC2 is to generate a key within EC2: Key Pairs.
+  - The public key will be put onto the webserver. 
+  - The private key will be used to connect from you computer to the web server.
+
+### Generate a Private key
+- We will use [EC2: Key Pairs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#KeyPairs:sort=keyName) to generate a key for AWS storage and EC2 connectivity.
   - This process will download a file such as web-site.pem - your private key
   - Save your keys to your home folder under a subfolder called .ssh/
-- Make sure you delete the key pair
+  - DELETE THE KEY YOU CREATED FROM EC2: Key Pairs! (Or you will break terraform later.)
+
+### Use the Private key to man a Public key
 ```bash
 $ cd
 $ cd .ssh
