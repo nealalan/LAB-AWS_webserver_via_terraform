@@ -43,7 +43,7 @@
     - If you register a domain name and use the DNS service within AWS, you will be charged. 
   - Understand and watch [billing](https://console.aws.amazon.com/billing/home?region=no-region#/bills) and [cost explorer](https://console.aws.amazon.com/billing/home?region=no-region#/). 
 - If you do see a few charges, don't panic and try to destroy everything. Seek guidance.
-  - If you destroy things, you may miss what is actually causing the charges. And may cause MORE charges@
+  - If you destroy things, you may miss what is actually causing the charges. And may cause MORE charges!
 
 # Section 2 - AWS Security
 - First, you need a password manager! 
@@ -53,7 +53,6 @@
 
 - When you have any account, you will be shown a number of pieces of data. 
 - Store these in your password manager! The data is for your root account. 
-- It is recommended you setup MFA (Multi-factor Authentication) for your root account.
 	- AWS Console address: https://<account-id-number>.signin.aws.amazon.com/console
 	- Username & Password
 	- Account ID
@@ -64,42 +63,47 @@
 - The [IAM Dashboard](https://console.aws.amazon.com/iam) will give you security status recomendations. Read them. Understand them. Put yourself in compliance. You don't want someone to get into your account and start running crypto mining and run in a $10,000 bill. It's happened.
 
 ![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/iam.png)
+- It is recommended you setup MFA (Multi-factor Authentication) for your root account.
+- A couple of soft token apps for your phone include:
+  - [Last Pass Authenticator](https://lastpass.com/auth/) (since you should be using Last Pass anyway!)
+  - Google Authenticator
 
-### Create new users
-- Use IAM to create a new Administrator user. This will actually be what you use. 
-  - It's a best practice not to log in with your root account.
+
+### Create new users in [IAM](https://console.aws.amazon.com/iam/home?=#/users)
+- New User: Administrator user. 
+  - This will actually be what you use for doing anything in AWS via a browser. It's a best practice not to log in with your root account.
   - I use my actual email address as my root and the first part (login) of my email as my main account. 
+  - Select AWS access type: AWS Management Console
 
 - Use IAM to create a new terraform user. This is what the script will use.
-  - Select programatic access. 
+  - Select AWS access type: Programmatic access
 
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.29.42%20PM.jpg?raw=true)
 
-- Attach existing policies:
+  - Attach existing policies:
     - AmazonVPCFullAccess
     - AmazonEC2FullAccess 
   - Grab your "Access Key ID" and "Secret Access Key" now. Save them in your Password Manager!
-    - This will be the only opportunity for you to save the "Secret Access Key".
+    - **This will be the only opportunity** for you to save the "Secret Access Key".
 
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.45.39%20PM.jpg?raw=true)
   - Note: it is important that you don't share these keys for anything. Also, you want to make sure they are never exposed on a webpage or on github.
 
 ## Public / Private Access Keys
-- You will need to create a key pair for use with the web server. 
-  - The public key will be put onto the webserver. 
+- These are seperate from the IAM access key! You will need to create a key pair for use with the web server. 
+  - The public key will be stored on and used by the webserver. 
   - The private key will be used to connect from you computer to the web server.
 
 ### Generate a Private key
-- We will use [EC2: Key Pairs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#KeyPairs:sort=keyName) to generate a key for AWS storage and EC2 connectivity.
+- Use [EC2: Key Pairs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#KeyPairs:sort=keyName) to generate a key for AWS storage and EC2 connectivity.
   - This process will download a file such as web-site.pem - your private key
   - Save your keys to your home folder under a subfolder called .ssh/
-  - DELETE THE KEY YOU CREATED FROM EC2: Key Pairs! (Or you will break terraform later.)
+  - DELETE THE KEY YOU CREATED FROM EC2: Key Pairs! 
+    - If you don't, it will break terraform later. Terraform will put the key back.
 
-### Use the Private key to man a Public key
+### Use the Private key to generate a Public key
 ```bash
 $ cd
-$ cd .ssh
-# if the folder doesn't exist
 $ mkdir .ssh
 $ cd .ssh
 # set the permissions on the key for it to be used by ssh utilities
@@ -109,22 +113,27 @@ $ ssh-keygen -y -f web-site.pem > web-site-pub-key.pem
 ```
 
 # Section 3 - Domain Name
+The cost is pretty cheap for first year and renewal years, as listed, for some "tld's" (top level domains).
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-14%20at%2012.59.41%20AM.jpg?raw=true)
 
 ## Pick Your Domain Name
 You have a couple choices for domain names.  
-- Domain names can be registered with GoDaddy or other registrar services. Or you can choose the cheapest one possible by searching "cheapest tld". 
+1) Can be registered and managed with GoDaddy or other registrar services. Or you can choose the cheapest one possible by searching "cheapest tld". 
   - Can save you a few dollars. If you search "setup godaddy point to aws" you will find instructions.
   - You have to setup the nameserver (NS) records on the registrar site to point to Amazon. 
-- For AWS Route 53, Go to "Registered domains" and click "Register domain"
+  - You can always transfer them to AWS in the future.
+2) Registered and manager with AWS Route 53. 
+  - Go to "Registered domains" and click "Register domain"
+  - A little more cost but less management necessary.
 
 ## Create a Hosted Zone in Route 53
-NOTE: The hosted zone in route 53 has a monthly charge of about 50 cents. If you choose, you can manage your DNS records outside of AWS. 
+NOTE: The hosted zone in route 53 has a monthly charge of about 50 cents. If you choose, you can manage your DNS records outside of AWS.
 - Go to "Hosted Zones" and click "Create Hosted Zone"
 - Enter your domain name and click Create!
-![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/nsrecords.png)
 - Create your Start of Authority (SOA) and NameServer (NS) records. The NS records will be entered under the domain as the name servers to look for the DNS records.
-![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.21.18%20PM.jpg?raw=true)
+![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/nsrecords.png)
 - Create your A type record for domain.com and www.domain.com
+![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.21.18%20PM.jpg?raw=true)
 - If you have a mail service setup that will host your mail, you can setup the MX records as shown.
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%208.20.34%20PM.jpg?raw=true)
 
