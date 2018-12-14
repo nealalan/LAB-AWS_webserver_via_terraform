@@ -75,11 +75,10 @@
   - I use my actual email address as my root and the first part (login) of my email as my main account. 
   - Select AWS access type: AWS Management Console
 
-- Use IAM to create a new terraform user. This is what the script will use.
+- New User: terraform user. 
+  - This is what the script will use from your computer for access to AWS.
   - Select AWS access type: Programmatic access
-
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.29.42%20PM.jpg?raw=true)
-
   - Attach existing policies:
     - AmazonVPCFullAccess
     - AmazonEC2FullAccess 
