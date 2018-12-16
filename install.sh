@@ -134,5 +134,8 @@ sudo apt install git
 git clone https://github.com/nealalan/nealalan.com.git /home/ubuntu/nealalan.com
 git clone https://github.com/nealalan/neonaluminum.com.git /home/ubuntu/neonaluminum.com
 
+# install speedtest command; toilet text formatter
+sudo apt install -y speedtest-cli toilet
+
 # OPTIONAL
 sudo reboot
