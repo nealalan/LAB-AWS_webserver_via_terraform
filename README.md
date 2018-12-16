@@ -272,8 +272,8 @@ And there I can directly edit my website.
 To get rid of everything: 
 - A few simple commands from your local machine
 ```bash
-- terraform plan -destroy
-- terraform destroy
+$ terraform plan -destroy
+$ terraform destroy
 ```
 - Make sure all your [EC2 instances](https://us-east-2.console.aws.amazon.com/ec2/v2/home) are stopped or gone!
 - Remove your [Elastic IPs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#Addresses:sort=PublicIp). 
