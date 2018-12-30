@@ -9,7 +9,7 @@
 - Note: Installing a quality file editor such as [Atom](https://atom.io/) is highly recommended!
 
 # Project Files
-You should be a good understanding of the files involved and the filesystem used on your computer and the webserver. I will go more in depth in the below sections on where these files come from and how to edit them.
+You should have a good understanding of the files involved and the filesystem used on your computer and the webserver. I will go more in depth in the below sections on where these files come from and how to edit them.
 
 ## Files I'm providing for you to edit
 - [vpc.tf](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/vpc.tf) - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet
