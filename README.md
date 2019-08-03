@@ -324,5 +324,11 @@ $ terraform destroy
 - Ensure your [Route 53 hosted zones](https://console.aws.amazon.com/route53/home) are deleted.
 - NOTE: Don't delete your account. You may want it again for another lab!
 
+# TO-DO
+- Add a terraform resource to add an alarm:
+	- Threshold: StatusCheckFailed >= 1 for 2 datapoints within 30 minutes
+	- Period: 15 minutes
+	- Datapoints to alarm: 2 out of 2
+	- Action: When in alarm, reboot the instance with id 
 
 [[edit](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/edit/master/README.md)]
