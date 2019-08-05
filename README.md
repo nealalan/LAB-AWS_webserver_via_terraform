@@ -12,7 +12,7 @@
 You should have a good understanding of the files involved and the filesystem used on your computer and the webserver. I will go more in depth in the below sections on where these files come from and how to edit them.
 
 ## Files I'm providing for you to edit
-- [vpc.tf](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/vpc.tf) - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet
+- * NEW SEPARATE FILES CREATED * [vpc.tf](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/vpc.tf) - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet
   - best practice is to separate out the terraform components into sections, but this worked out well for me to have it in one file
   - I can see a good practice in storing the variables in a separate .tf file - which is what terraform recommends
 - [install.sh](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/install.sh) - shell script to configure the Ubuntu instance to configure NGINX web server with secure websites (https)
@@ -217,6 +217,7 @@ We will be referring to these in our variables in our terraform script.
   - I choose to manually create my own, becaus I'd have to manage my DNS records everytime terraform destroyed my Elastic IP.
 
 ## Customize the script
+- NOTE: NEW SEPARATE FILES CREATED!!!! 
 ```bash
 $ atom vpc.tf
 ```
