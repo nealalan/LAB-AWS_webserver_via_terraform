@@ -1,45 +1,35 @@
 ## [nealalan.github.io](https://nealalan.github.io)/[LAB-AWS_webserver_via_terraform](https://nealalan.github.io/LAB-AWS_webserver_via_terraform)
 
 # Project Goal
-- Stay security minded by restricting network access and creating a secure web server. 
-- Create a secure web server within the free tier of AWS.
+- Use the free tier of AWS.
 - Fully automate the creation of a Virtual Private Cloud and all necessary components.
-- Automate, as much as possible, the installation and configuration of an NGINX webserver.
+- Automate, as much as possible, the installation and configuration of the webserver.
+- Be security minded by restricting network access and creating a secure web server. 
 - Pull the website source data from github.
-- Note: Installing a quality file editor such as [Atom](https://atom.io/) is highly recommended!
 
 # Project Files
-You should have a good understanding of the files involved and the filesystem used on your computer and the webserver. I will go more in depth in the below sections on where these files come from and how to edit them.
+You should have a good understanding of the files involved and the filesystem used on your computer and the webserver. Also you will need to know how to edit the files. I am using `atom` in my examples, but you can replace if with `code` is you use VisualStudio Code.
 
-## This repo ~~contains two~~ use to contain two files:
-- vpc.tf - a consolidated terraform file (infrastructure as code) to create a VPC, associated components and an EC2 Ubuntu instance in a Public Subnet - __This is now broken down into multiple _tf_ files__
-  - best practice is to separate out the terraform components into sections, but this worked out well for me to have it in one file
-  - I can see a good practice in storing the variables in a separate .tf file - which is what terraform recommends
-- [install.sh](https://github.com/nealalan/tf-201812-nealalan.com/blob/master/install.sh) - shell script to configure the Ubuntu instance to configure NGINX web server with secure websites (https)
-  - website are automatically pulled from git repos for respective sites
+## Terraform Files
+\*.tf - terraform files (infrastructure as code) to create a VPC, infrastructure components and an Ubuntu webserver in a Public Subnet 
+- The best practice is to separate out the terraform components into sections
+- I can see a good practice in storing the variables in a separate .tf file - which is what terraform recommends
 
-## Your system (computer and webserver)
-- ~/ - your home folder on both your computer (if using a Mac or Linux based system) 
-  - Mine, on my Mac is /home/neal/ and on the Ubuntu webserver it is /home/ubuntu/)
-  - The tilde is just a shortcut to the default location of all of your files. If you type the commande "cd" you will always be returned to the home folder.
-- ~/Projects/ - where your projects should be located, including the scripts you pull down
+## Shell Script File
+- [install.sh](https://github.com/nealalan/tf-nealalan.com/blob/master/install.sh) - shell script to configure the NGINX web server with secure websites (https)
 
-## 'Hidden' files the system uses
+## Your system and 'Hidden' files the system uses
 You will need to understand what these files are and be able to edit these files
-
+- ~/ - your home folder on both your computer (if using a Mac or Linux based system). On my Mac it is /home/neal/ and on the Ubuntu webserver it is /home/ubuntu
 - ~/.ssh/web-site.pem - Private key for you only. Good idea to store a copy in your pwd mgr.
-- ~/.ssh/web-site-pub-key.pem - Public key so you can connect to your server. 
-  - This is stored on AWS and in Ubuntu.
-- ~/.ssh/known_hosts - System file that stores a key fingerprint
-  - If you delete and recreate the same instance many times, you'll have to remove 'offending' records from here
-- ~/.aws/credentials - the file that will store your automated AWS keys and secret keys
+- ~/.ssh/web-site-pub-key.pem - Public key so you can connect to your server. This is stored on AWS and in Ubuntu.
+- ~/.ssh/known_hosts - System file that stores a key fingerprint. (Note: If you delete and recreate the same instance many times, you'll have to remove 'offending' records from here.)
+- ~/.aws/credentials - File that will store your automated AWS keys and secret keys.
 
 # Section 1 - [AWS Account](https://aws.amazon.com/) Setup.
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/AWSfreetier.png?raw=true)
-- If you have a .edu email address you can sign up for an educational account. No credit card required! Keep this forever!
-- You will have to enter a credit card, but will still be given "free tier" credit. 
-  - Don't worry, if you have a major mishap and some charges, AWS will be nice enough to credit you. 
-  - But you'll want a credit card on file if you decide to buy a domain name(s) and use Route 53.
+- If you have a .edu email address you can sign up for an educational account. No credit card required!
+- You must enter a credit card to create an account, but will still be given "free tier" credit. It is very easy to go out of the free tier! If you have a mishap and charges you, support might credit you. Ask nicely. 
 - Now, create your AWS root account!
 
 ## Billing
@@ -56,12 +46,11 @@ Lets talk about billing. Even though you are using the Free Tier, it is your res
   - If you register a domain name and use the DNS service within AWS, you will be charged. 
 - Understand and watch [billing](https://console.aws.amazon.com/billing/home?region=no-region#/bills) and [cost explorer](https://console.aws.amazon.com/billing/home?region=no-region#/). 
 - If you do see a few charges, don't panic and try to destroy everything. Seek guidance.
-  - If you destroy things, you may miss what is actually causing the charges. And may cause MORE charges!
+  - If you destroy things, you may miss what is actually causing the charges. In some cases, you may cause MORE charges by improperly destroying resources!
 
 # Section 2 - AWS Security
-First, you need a password manager! 
-- If you're not using a password manager, you might not be ready for cloud technology! 
-- You will have a number of keys and passwords to keep track of. Keep them in your password manager!
+First, you need a password manager! If you're not using a password manager, USE ONE! You will have keys and passwords to keep track of and a password manager is the best way!
+
 - Here's a good article on password managers... [Consumer Reports: Everything You Need to Know About Password Managers](https://www.consumerreports.org/digital-security/everything-you-need-to-know-about-password-managers/)
 
 - When you create an account, you will be shown a number of pieces of data. Store these in your password manager! The data is for your root account. 
@@ -76,27 +65,27 @@ First, you need a password manager!
   - Read them. 
   - Understand them. 
   - Put yourself in compliance. 
-  - You don't want someone to penetrate account, start running crypto mining and give you a bill for $10,000. 
-  - It's happened.
 
 ![](https://raw.githubusercontent.com/nealalan/EC2_Ubuntu_LEMP/master/iam.png)
+
 - It is recommended you setup MFA (Multi-factor Authentication) for your root account.
 - A couple of soft token apps for your phone include:
-  - [Last Pass Authenticator](https://lastpass.com/auth/) (since you should be using LastPass anyway!)
+  - [Last Pass Authenticator](https://lastpass.com/auth/) is perfect if you use LastPass as your password manager.
   - Google Authenticator
 
 ### Create new users in [IAM](https://console.aws.amazon.com/iam/home?=#/users)
 
-#### New User: Administrator user. 
-- This will actually be what you use for doing anything in AWS via a browser. 
-- It's a best practice not to log in with your root account.
+#### New User: administrator user
+- This will actually be what you use for doing anything in AWS via a browser. The best practice is not to log in with your root account.
 - I use my actual email address as my root and the first part (login) of my email as my main account. 
 - Select AWS access type: AWS Management Console
 
-#### New User: terraform user. 
+#### New User: terraform user
 - This is what the script will use from your computer for access to AWS.
 - Select AWS access type: Programmatic access
+
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.29.42%20PM.jpg?raw=true)
+
 - Attach existing policies:
   - AmazonVPCFullAccess
   - AmazonEC2FullAccess 
@@ -104,6 +93,7 @@ First, you need a password manager!
   - **This will be the only opportunity** for you to save the "Secret Access Key".
 
 ![](https://github.com/nealalan/LAB-AWS_webserver_via_terraform/blob/master/images/Screen%20Shot%202018-12-13%20at%207.45.39%20PM.jpg?raw=true)
+
 - Note: it is important that you don't share these keys for anything. You want to make sure the secret key is never exposed on a webpage or on github.
 
 ## Public / Private Access Keys
@@ -115,8 +105,7 @@ First, you need a password manager!
 - Use [EC2: Key Pairs](https://us-east-2.console.aws.amazon.com/ec2/v2/home?#KeyPairs:sort=keyName) to generate a key for AWS storage and EC2 connectivity.
   - This process will download a file such as web-site.pem - your private key
   - Save your keys to your home folder under a subfolder called .ssh/
-  - DELETE THE KEY YOU CREATED FROM EC2: Key Pairs! 
-    - If you don't, it will break terraform later. Terraform will put the key back.
+  - IMPORTANT: DELETE THE KEY YOU CREATED FROM AWS: EC2: Key Pairs! If you don't, it will break terraform. (Terraform will put the key back.)
 
 ### Use the Private key to generate a Public key
 ```bash
@@ -146,7 +135,7 @@ You have a couple choices for domain names.
   - A little more cost but less management necessary.
 
 ## Create a Hosted Zone in Route 53
-NOTE: The hosted zone in route 53 has a monthly charge of about 50 cents. If you choose, you can manage your DNS records outside of AWS as mentioned in the last section.
+The hosted zone in route 53 has a monthly charge of about 50 cents. If you choose, you can manage your DNS records outside of AWS as mentioned in the last section.
 
 - Go to "Hosted Zones" and click "Create Hosted Zone"
 - Enter your domain name and click Create!
@@ -173,7 +162,7 @@ $ mkdir Projects
 ```bash
 $ cd Projects
 # pull down the scripts
-$ git clone https://github.com/nealalan/LAB-AWS_webserver_via_terraform.git
+$ git clone https://github.com/nealalan/tf-nealalan.com.git
 ```
 
 - You will see the progess of the download...
@@ -190,7 +179,7 @@ $ brew install terraform
 ```
 
 ## Setup Credentials
-Use the keys created in AWS IAM.
+Add the keys created in AWS IAM to your ~/.aws/credentials file.
 ```bash
 $ cd
 $ mkdir .aws
@@ -204,23 +193,18 @@ In the credentials file you want to add an entry:
 aws_access_key_id = A*******************
 aws_secret_access_key = z9************************************
 ```
+
 We will be referring to these in our variables in our terraform script.
 
 ## Create an Elastic IP address
-- Go to VPC, Click Elastic IP, Click Allocate New Address and select Amazon Pool.
-  - Make a note of the IP address. You will need it later.
+- Go to VPC, Click Elastic IP, Click Allocate New Address and select Amazon Pool. Make a note of the IP address. You will need it later.
 
-- IMPORTANT: An elastic IP may incur an hourly charge ($0.003) if you take longer than an hour to submit the terraform script.   - Be prepared to manually delete the Elastic IP if you destroy your project or instance!!! 
-  - You are manually creating this Elastic IP. Terraform WILL NOT manage or delete this for you!
-  - It's a benefit to keep an Elastic IP so you don't have to go change your DNS records IP address anytime your instance is restarted.
-- SIDE NOTE: It is possible for Terraform to manually create an Elastic IP address. 
-  - I choose to manually create my own, becaus I'd have to manage my DNS records everytime terraform destroyed my Elastic IP.
+- IMPORTANT: An elastic IP may incur an hourly charge ($0.003) if you take longer than an hour to submit the terraform script. - You are manually creating this Elastic IP. Terraform WILL NOT manage or delete this for you! Be prepared to manually delete the Elastic IP if you destroy your project or instance and won't implement it soon!!! 
+- It's a benefit to keep an Elastic IP, so you don't have to go change your DNS records IP address anytime your instance is restarted.
+- SIDE NOTE: It is possible for Terraform to create an Elastic IP address and update your DNS records. I choose to manually create my own.
 
-## Customize the script
-- NOTE: NEW SEPARATE FILES CREATED!!!! 
-```bash
-$ atom vpc.tf
-```
+## Customize the scripts
+Most of the changes will take place in the [variables.tf](https://github.com/nealalan/tf-nealalan.com/blob/master/variables.tf) file.
 
 1. Remove documentation that is irrelevant to the your site.
 2. Change variables project_name. This is what your VPC will be named.
@@ -229,7 +213,7 @@ $ atom vpc.tf
 5. Add the instance_assigned_elastic_ip as the Elastic IP address you created.
 6. Find your local IP address as add_my_inbound_ip_cidr:
 ```bash
-$ curl -4 ifconfig.co
+$ curl ifconfig.co
 ```
 
 7. (optional) Set your CIDR ranges. For this project we only need a couple of IP addresses, but you also want to learn CIDR addressing from a scalable perspective.
@@ -256,16 +240,17 @@ $ terraform apply
 ```bash
 $ ssh -i ~/.ssh/web-site.pem ubuntu@ip
 ```
+
 - Since you are using your elastic IP, you can connect to it or you can replace IP with any domain name the DNS records list the IP address for. Think of it as a shortcut.
   
-Note: If your IP changes, for example you're on a VPN, you will need to add your new IP address to the VPC ACL. I do this nearly everytime I go to a new coffee shop.
+Note: If your IP changes, for example you're on a VPN, you will need to add your new IP address to the [VPC Security Group](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#SecurityGroups:sort=groupId). I do this nearly everytime I go to a new coffee shop.
 
 # Section 5 - NGINX and server configuration script
 
 ## Download 
-You need to download the generic version of the script and then make the script executable.
+Download the generic version of the script and then make the script executable.
 ```bash
-$ curl https://raw.githubusercontent.com/nealalan/LAB-AWS_webserver_via_terraform/master/install.sh > install.sh
+$ curl https://raw.githubusercontent.com/nealalan/tf-nealalan.com/master/install.sh > install.sh
 $ chmod +x ./install.sh
 ```
 
@@ -297,8 +282,7 @@ $ nano -m index.html
 ```
 
 - I can now directly edit my website.
-- Note, if you haven't used nano before, you can use search how to. 
-  - To summarize, you can use the arrow keys, type on lines and use Ctrl-X to exit
+- Note, if you haven't used nano before, you can use search how to. To summarize, you can use the arrow keys, type on lines and use Ctrl-X to exit
 
 ## My page
 - Here's my page: 
